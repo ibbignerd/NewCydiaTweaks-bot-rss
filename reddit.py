@@ -6,8 +6,10 @@ import os
 #What lies ahead is probably broken
 print 'Connecting' 
 r = praw.Reddit(user_agent='newcydia tweaks rss bot')
-print 'Starting to log in!' 
-r.login('newcydiatweaks', 'yosemite') 
+print 'Starting to log in!'
+
+password = ''
+r.login('newcydiatweaks', password) 
 print 'Completed log in!'
 feed = 'http://modmyi.com/cydia/rsscat.php?category=Tweaks'
 sub = 'newcydiatweaks'
@@ -16,7 +18,7 @@ done = []
 f = feedparser.parse(feed)
 
 while True:
-    if d.entries[0]['link'] in done:
+    if f.entries[0]['link'] in done:
         pass
 
     else:
