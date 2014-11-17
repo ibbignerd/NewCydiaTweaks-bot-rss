@@ -1,0 +1,7 @@
+# File: urlparse-example-1.py
+
+import urlparse
+
+print urlparse.urlparse("http://host/com.null.george;params?query#fragment")
+
+## ('http', 'host', '/path', 'params', 'query', 'fragment')
