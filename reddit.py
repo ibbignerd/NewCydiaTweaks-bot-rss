@@ -1,4 +1,4 @@
-
+import sqlite3
 
 import praw
 import time
@@ -23,23 +23,28 @@ def parseFeed():
     f = feedparser.parse(feed)
     link = f.entries[0]['link']
     title = f['entries'][0]['title']
-
+parseFeed()
 
 # This will get the cydia.saurik.com link
 def linkConvert():
     newLink = link.split('/')
     conLink = newLink[4]
     saurikLink = 'http://cydia.saurik.com/' + conLink
-
+linkConvert()
 def post():
     r.submit(sub, title, url=saurikLink)
+    link = f.entries[0]['link'] # N - should be using the cydia.saurik.com links using the bundle id
+    linkConvert()
+    title = f['entries'][0]['title'] # N - Title needs to be parsed for better formatting
+    print saurikLink
+    #r.submit(sub, title, url=saurikLink)
+    print 'Submitted {0}'.format(title)
 
-    
+post()   
 
 # N - All code before this comment will only be executed once.
 # N - Migrate to using functions to make your code cleaner - def functionName(var1):
-def post():
-    while True:
+while True:
 
         if f.entries[0]['link'] in done:
             pass # N - Because this if statement if in your main function, if you use "pass", it will just skip everything including the wait.else:
