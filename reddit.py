@@ -6,63 +6,41 @@ import feedparser
 import os
 import urlparse
 
-#What lies ahead is probably broken
-def login():
-    print 'Connecting'
-    r = praw.Reddit(user_agent='newcydia tweaks rss bot')
-    print 'Starting to log in!'
-    sub = 'newcydiatweaks'
-    password = ''
-    r.login('newcydiatweaks', password)
-    print 'Completed log in!'
+#These are your variables that don't change between restarting the program
+feed = 'http://modmyi.com/cydia/rsscat.php?category=Tweaks'
+done = []
+# Things that only need to be done once don't need to be in a function
 
-#parses rss feed
+print 'Connecting'
+r = praw.Reddit(user_agent='newcydia tweaks rss bot by /u/') #put your username here to make it more unique
+print 'Starting to log in!'
+sub = 'newcydiatweaks'
+password = ''
+r.login('newcydiatweaks', password)
+print 'Completed log in!'
+
+sql = sqlite3.connect('sql.db')
+log.info('Loaded SQL Database')
+cur = sql.cursor()
+cur.execute('CREATE TABLE IF NOT EXISTS submitted(ID TEXT)')
+sql.commit()
+
 def parseFeed():
-    feed = 'http://modmyi.com/cydia/rsscat.php?category=Tweaks'
-    done = []
     f = feedparser.parse(feed)
-    link = f.entries[0]['link']
-    title = f['entries'][0]['title']
-parseFeed()
+    for post in f.entries:
+        bundleid = f.link.replace('http://modmyi.com/cydia/', '')
 
-# This will get the cydia.saurik.com link
-def linkConvert():
-    newLink = link.split('/')
-    conLink = newLink[4]
-    saurikLink = 'http://cydia.saurik.com/package/' + conLink
-linkConvert()
-def post():
-    r.submit(sub, title, url=saurikLink)
-    link = f.entries[0]['link'] # N - should be using the cydia.saurik.com links using the bundle id
-    linkConvert()
-    title = f['entries'][0]['title'] # N - Title needs to be parsed for better formatting
-    print saurikLink
-    #r.submit(sub, title, url=saurikLink)
-    print 'Submitted {0}'.format(title)
+        cur.execute('SELECT * FROM submitted WHERE ID=?', [bundleid])
+        if not cur.fetchone():
+            tweakName = f.title.replace('Tweaks: ', '')
+            link = 'http://cydia.saurik.com/package/' + bundleid
+            desc = f.description
 
-post()   
 
-# N - All code before this comment will only be executed once.
-# N - Migrate to using functions to make your code cleaner - def functionName(var1):
+
+            cur.execute("INSERT INTO submitted VALUES(?)", bundleid)
+            sql.commit()
+
 while True:
-
-        if f.entries[0]['link'] in done:
-            pass # N - Because this if statement if in your main function, if you use "pass", it will just skip everything including the wait.else:
-            try:
-                
-                link = f.entries[0]['link'] # N - should be using the cydia.saurik.com links using the bundle id
-                linkConvert()
-                title = f['entries'][0]['title'] # N - Title needs to be parsed for better formatting
-                print saurikLink
-                r.submit(sub, title, url=saurikLink)
-                print 'Submitted {0}'.format(title)
-
-                done.append(link) #This is annoying because it will go if the program is quit. Not to self: maintain a list of post titles in a text file - db thingy
-                # N - Look into using sqlite3 for saving your files. its really easy to use and is better on your resources
-            except Exception, e:
-                print e
-        # N - This setup makes it so that you are only checking one entry every 30 seconds. I guess that can be okay, but it's possible that the feed gets more than one entry in a 30 second span and now you are behind. The only way you would be able to catch up is if there is a period of no new entries in the feed. I would suggest looping through all the feed and checking it against the saved links.
-        time.sleep()
-
-
-    
+    parseFeed()
+    time.sleep(120)
