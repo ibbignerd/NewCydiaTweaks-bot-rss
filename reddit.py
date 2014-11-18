@@ -29,7 +29,7 @@ parseFeed()
 def linkConvert():
     newLink = link.split('/')
     conLink = newLink[4]
-    saurikLink = 'http://cydia.saurik.com/' + conLink
+    saurikLink = 'http://cydia.saurik.com/package/' + conLink
 linkConvert()
 def post():
     r.submit(sub, title, url=saurikLink)
